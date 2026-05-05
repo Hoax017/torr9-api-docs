@@ -81,11 +81,14 @@ components:
         jeton_balance: { type: integer }
     Torrent:
       type: object
+      description: 'Champs varient selon endpoint (recent/search/list/detail). Les champs non-applicables sont absents ou null.'
       properties:
         id: { type: integer }
         title: { type: string }
         description: { type: string, description: BBCode, nullable: true }
         info_hash: { type: string, nullable: true }
+        magnet_link: { type: string, nullable: true }
+        torrent_file_url: { type: string, nullable: true, description: 'path relatif (uploads/torrents/{hash}.torrent)' }
         file_size_bytes: { type: integer, format: int64 }
         file_count: { type: integer, nullable: true }
         upload_date: { type: string, format: date-time }
@@ -93,17 +96,21 @@ components:
         age: { type: string, description: 'humanisé (ex 19 minutes, 1 heure)', nullable: true }
         is_freeleech: { type: boolean }
         is_exclu: { type: boolean, nullable: true }
-        status: { type: string, nullable: true }
+        is_private: { type: boolean, nullable: true }
+        is_anon: { type: boolean, nullable: true }
+        status: { type: string, nullable: true, description: 'active, pending, etc.' }
         note_admin: { type: string, nullable: true }
         tags: { type: array, items: { type: string } }
-        category_name: { type: string }
+        category_id: { type: integer, nullable: true }
+        category_name: { type: string, nullable: true }
         category_icon: { type: string, nullable: true }
-        parent_category_name: { type: string }
-        uploader_name: { type: string }
-        seeders: { type: integer }
-        leechers: { type: integer }
-        times_completed: { type: integer }
-        comment_count: { type: integer }
+        parent_category_name: { type: string, nullable: true }
+        uploader_id: { type: integer, nullable: true }
+        uploader_name: { type: string, nullable: true }
+        seeders: { type: integer, nullable: true }
+        leechers: { type: integer, nullable: true }
+        times_completed: { type: integer, nullable: true }
+        comment_count: { type: integer, nullable: true }
         tmdb_id: { type: integer, nullable: true }
         tvdb_id: { type: integer, nullable: true }
         imdb_id: { type: string, nullable: true }
@@ -116,6 +123,15 @@ components:
       type: object
       properties:
         count: { type: integer }
+        torrents:
+          type: array
+          items: { $ref: '#/components/schemas/Torrent' }
+    TorrentListSimple:
+      type: object
+      description: 'Wrapper minimal sans pagination (limit + page + torrents[]). Inclut description/magnet_link/torrent_file_url contrairement à recent.'
+      properties:
+        limit: { type: integer }
+        page: { type: integer }
         torrents:
           type: array
           items: { $ref: '#/components/schemas/Torrent' }
@@ -602,12 +618,16 @@ paths:
   /api/v1/torrents:
     get:
       tags: [torrents]
-      summary: List torrents
+      summary: List torrents (avec description + magnet_link + torrent_file_url)
       parameters:
-        - { name: page, in: query, schema: { type: integer } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
         - { name: limit, in: query, schema: { type: integer } }
       responses:
-        '200': { description: Liste, content: { application/json: { schema: { $ref: '#/components/schemas/TorrentList' } } } }
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TorrentListSimple' }
   /api/v1/torrents/recent:
     get:
       tags: [torrents]
