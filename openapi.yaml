@@ -804,21 +804,49 @@ paths:
   /api/v1/rss/recent:
     get:
       tags: [rss]
-      summary: Flux RSS récent
+      summary: Flux RSS récent (XML)
       security: []
       parameters:
         - { name: passkey, in: query, required: true, schema: { type: string } }
         - { name: limit, in: query, schema: { type: integer } }
-      responses: { '200': { description: RSS XML } }
+      responses:
+        '200':
+          description: |
+            RSS 2.0 XML. Chaque `<item>` contient title, link (page torrent), description (uploader/size/category),
+            pubDate, category, guid, et `<enclosure>` pointant `/api/v1/rss/torrents/{id}/download?passkey=...`
+            (le .torrent direct).
+          content:
+            application/rss+xml:
+              schema: { type: string, format: xml }
   /api/v1/rss/{category}:
     parameters:
-      - { name: category, in: path, required: true, schema: { type: string } }
+      - { name: category, in: path, required: true, schema: { type: string }, description: 'slug catégorie (films, series-tv, music, etc.)' }
     get:
       tags: [rss]
       security: []
       parameters:
         - { name: passkey, in: query, required: true, schema: { type: string } }
-      responses: { '200': { description: RSS XML } }
+      responses:
+        '200':
+          description: 'RSS 2.0 XML filtré par catégorie'
+          content:
+            application/rss+xml:
+              schema: { type: string, format: xml }
+  /api/v1/rss/torrents/{id}/download:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [rss]
+      summary: Download .torrent via passkey (utilisé dans enclosure RSS)
+      security: []
+      parameters:
+        - { name: passkey, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: 'Bytes du .torrent'
+          content:
+            application/x-bittorrent:
+              schema: { type: string, format: binary }
 
   # ===== INVITATIONS =====
   /api/v1/invitation-codes/user:
