@@ -514,6 +514,43 @@ components:
       type: object
       properties:
         rss_key: { type: string }
+    RssEnclosure:
+      type: object
+      xml: { name: enclosure }
+      properties:
+        url: { type: string, xml: { attribute: true } }
+        length: { type: integer, format: int64, xml: { attribute: true } }
+        type: { type: string, xml: { attribute: true }, example: 'application/x-bittorrent' }
+    RssItem:
+      type: object
+      xml: { name: item }
+      properties:
+        title: { type: string }
+        link: { type: string, description: 'URL page torrent' }
+        description: { type: string, description: 'Uploaded by X | Size: Y | Category: Z' }
+        pubDate: { type: string, description: 'RFC 822 date' }
+        category: { type: string }
+        guid: { type: string, description: 'identique à link' }
+        enclosure: { $ref: '#/components/schemas/RssEnclosure' }
+    RssChannel:
+      type: object
+      xml: { name: channel }
+      properties:
+        title: { type: string, example: 'Torr9 - Torrents Récents' }
+        link: { type: string, example: 'https://torr9.net' }
+        description: { type: string }
+        language: { type: string, example: 'fr-FR' }
+        item:
+          type: array
+          xml: { wrapped: false }
+          items: { $ref: '#/components/schemas/RssItem' }
+    RssFeed:
+      type: object
+      xml: { name: rss }
+      description: 'Flux RSS 2.0 (Content-Type: application/rss+xml)'
+      properties:
+        version: { type: string, xml: { attribute: true }, example: '2.0' }
+        channel: { $ref: '#/components/schemas/RssChannel' }
 
 paths:
   # ===== AUTH =====
@@ -811,13 +848,10 @@ paths:
         - { name: limit, in: query, schema: { type: integer } }
       responses:
         '200':
-          description: |
-            RSS 2.0 XML. Chaque `<item>` contient title, link (page torrent), description (uploader/size/category),
-            pubDate, category, guid, et `<enclosure>` pointant `/api/v1/rss/torrents/{id}/download?passkey=...`
-            (le .torrent direct).
+          description: 'Flux RSS 2.0 XML'
           content:
             application/rss+xml:
-              schema: { type: string, format: xml }
+              schema: { $ref: '#/components/schemas/RssFeed' }
   /api/v1/rss/{category}:
     parameters:
       - { name: category, in: path, required: true, schema: { type: string }, description: 'slug catégorie (films, series-tv, music, etc.)' }
@@ -828,10 +862,10 @@ paths:
         - { name: passkey, in: query, required: true, schema: { type: string } }
       responses:
         '200':
-          description: 'RSS 2.0 XML filtré par catégorie'
+          description: 'Flux RSS 2.0 XML filtré par catégorie'
           content:
             application/rss+xml:
-              schema: { type: string, format: xml }
+              schema: { $ref: '#/components/schemas/RssFeed' }
   /api/v1/rss/torrents/{id}/download:
     parameters:
       - { name: id, in: path, required: true, schema: { type: integer } }
