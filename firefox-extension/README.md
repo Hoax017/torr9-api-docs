@@ -12,30 +12,29 @@ L'extension contourne en:
 3. Le background utilise `fetch` privilégié de l'extension (pas de CORS browser) avec `Origin: https://torr9.net` spoofé
 4. La réponse est renvoyée à la page comme si le fetch direct avait réussi
 
-## Install (mode dev / temporaire)
+## Install (signée AMO — recommandé)
+
+1. Télécharge `torr9-cors-unlock.xpi` depuis la [release](https://github.com/Hoax017/torr9-api-docs/releases/latest)
+2. Glisse-dépose le `.xpi` sur l'onglet `about:addons` de Firefox (ou clique le `.xpi` dans Firefox direct)
+3. Confirme l'install
+4. Reste active jusqu'à suppression manuelle
+
+## Install (dev / non signée, depuis ce dossier)
 
 1. Firefox → `about:debugging#/runtime/this-firefox`
-2. **"Charger un module complémentaire temporaire…"**
-3. Sélectionne `manifest.json` dans ce dossier
-4. Active sur https://hoax017.github.io/torr9-api-docs/, http://localhost:*, http://127.0.0.1:*
-
-L'extension reste active jusqu'à la fermeture de Firefox.
+2. **"Charger un module complémentaire temporaire…"** → sélectionne `manifest.json`
+3. ⚠️ Perdue à la fermeture de Firefox
 
 ## Vérifier
 
 DevTools console (F12) → tu dois voir:
 ```
-[Torr9 CORS Unlock] fetch + XHR patched pour api.torr9.net
+[Torr9 CORS Unlock] content bridge actif
+[Torr9 CORS Unlock] fetch + XHR patched dans la page
 ```
 
 Si oui, Try-it marche.
 
 ## Sécurité
 
-⚠️ L'extension intercepte tout fetch vers `api.torr9.net` depuis les pages où le content script tourne. Le scope est limité aux 3 origines listées dans `manifest.json` — pas d'effet ailleurs. Désactive après usage si paranoïaque.
-
-## Permanent
-
-Firefox stable refuse les extensions non signées en mode permanent. Pour permanent:
-- Soumets sur https://addons.mozilla.org/ (validation review)
-- Ou utilise Firefox Developer Edition / Nightly + `xpinstall.signatures.required = false` dans `about:config`
+⚠️ L'extension intercepte tout fetch vers `api.torr9.net` depuis les pages où le content script tourne. Scope limité aux 3 origines listées dans `manifest.json` (`hoax017.github.io`, `localhost`, `127.0.0.1`) — pas d'effet ailleurs. Désactive après usage si paranoïaque.
