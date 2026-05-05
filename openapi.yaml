@@ -852,6 +852,25 @@ paths:
           content:
             application/rss+xml:
               schema: { $ref: '#/components/schemas/RssFeed' }
+              example: |
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rss version="2.0">
+                  <channel>
+                    <title>Torr9 - Torrents Récents</title>
+                    <link>https://torr9.net</link>
+                    <description>Flux RSS des derniers torrents publiés sur Torr9</description>
+                    <language>fr-FR</language>
+                    <item>
+                      <title>Wild.Strawberries.1957.MULTI.VFF.1080p.WEB.DDP.2.0.H264-FW</title>
+                      <link>https://torr9.net/torrents/259587</link>
+                      <description>Uploaded by award6013 | Size: 7.4 GB | Category: Films</description>
+                      <pubDate>Tue, 05 May 2026 22:04:44 +0000</pubDate>
+                      <category>Films</category>
+                      <guid>https://torr9.net/torrents/259587</guid>
+                      <enclosure url="https://api.torr9.net/api/v1/rss/torrents/259587/download?passkey=XXX" length="7893428845" type="application/x-bittorrent"/>
+                    </item>
+                  </channel>
+                </rss>
   /api/v1/rss/{category}:
     parameters:
       - { name: category, in: path, required: true, schema: { type: string }, description: 'slug catégorie (films, series-tv, music, etc.)' }
@@ -866,6 +885,25 @@ paths:
           content:
             application/rss+xml:
               schema: { $ref: '#/components/schemas/RssFeed' }
+              example: |
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rss version="2.0">
+                  <channel>
+                    <title>Torr9 - film</title>
+                    <link>https://torr9.net</link>
+                    <description>Flux RSS des derniers torrents publiés sur Torr9</description>
+                    <language>fr-FR</language>
+                    <item>
+                      <title>Hoppers.2026.MULTi.TRUEFRENCH.1080p.WEB-DL.H264-Slay3R</title>
+                      <link>https://torr9.net/torrents/259446</link>
+                      <description>Uploaded by bidib | Size: 8.3 GB | Category: Films d'animation</description>
+                      <pubDate>Tue, 05 May 2026 17:39:04 +0000</pubDate>
+                      <category>Films d'animation</category>
+                      <guid>https://torr9.net/torrents/259446</guid>
+                      <enclosure url="https://api.torr9.net/api/v1/rss/torrents/259446/download?passkey=XXX" length="8877262467" type="application/x-bittorrent"/>
+                    </item>
+                  </channel>
+                </rss>
   /api/v1/rss/torrents/{id}/download:
     parameters:
       - { name: id, in: path, required: true, schema: { type: integer } }
