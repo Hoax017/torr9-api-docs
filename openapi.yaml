@@ -6,6 +6,18 @@ info:
     Spec OpenAPI reconstruite à partir des chunks JS (`/_next/static/chunks/`) et
     de captures réseau. Méthodes HTTP inférées par convention quand non observées.
     Champs réponse confirmés via fetch live pour `/auth/login` et `/torrents/exclus`.
+
+    ## ⚠️ Try it out — extension nécessaire
+
+    L'API `api.torr9.net` n'autorise que `Origin: https://torr9.net` en CORS.
+    Les requêtes envoyées depuis cette page (github.io ou localhost) sont **bloquées par le navigateur**.
+
+    Pour tester en live depuis ici, installe une extension de désactivation CORS:
+    - Chrome: [CORS Unblock](https://chrome.google.com/webstore/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino)
+    - Firefox: [CORS Everywhere](https://addons.mozilla.org/firefox/addon/cors-everywhere/)
+
+    Active l'extension uniquement le temps des tests, puis désactive-la (sécurité).
+    Alternative: appelle l'API en `curl` ou Node avec ton token.
 servers:
   - url: https://api.torr9.net
     description: Prod
