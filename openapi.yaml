@@ -910,12 +910,23 @@ paths:
     get:
       tags: [rss]
       summary: Download .torrent via passkey (utilisé dans enclosure RSS)
+      description: |
+        Retourne le fichier `.torrent` directement (Content-Type: `application/x-bittorrent`).
+
+        Stoplight Try-it ne sait pas afficher le binaire ("No supported response body returned") — utilise
+        directement l'URL dans ton navigateur ou client BitTorrent:
+
+        ```
+        https://api.torr9.net/api/v1/rss/torrents/{id}/download?passkey=<ta_passkey>
+        ```
+
+        Récupère ta passkey via `GET /api/v1/rss/key`.
       security: []
       parameters:
         - { name: passkey, in: query, required: true, schema: { type: string } }
       responses:
         '200':
-          description: 'Bytes du .torrent'
+          description: 'Bytes du .torrent (Content-Disposition: attachment)'
           content:
             application/x-bittorrent:
               schema: { type: string, format: binary }
