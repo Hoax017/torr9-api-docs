@@ -14,7 +14,12 @@ info:
 
     Pour tester en live depuis ici, installe une extension de désactivation CORS:
 
-    - **Firefox dédié (recommandé)**: [Torr9 CORS Unlock](https://github.com/Hoax017/torr9-api-docs/releases/latest) — extension custom qui spoofe l'Origin uniquement pour `api.torr9.net`. Télécharge le `.xpi` puis drag-drop sur `about:addons` (ou install temporaire via `about:debugging`).
+    - **Firefox dédié (recommandé)**: [Torr9 CORS Unlock](https://github.com/Hoax017/torr9-api-docs/releases/latest) — extension custom qui spoofe l'Origin uniquement pour `api.torr9.net`. **Install obligatoirement via `about:debugging`** (Firefox bloque les .xpi non signés en direct):
+        1. Télécharge `torr9-cors-unlock.xpi` depuis la release
+        2. Ouvre `about:debugging#/runtime/this-firefox`
+        3. Clic **"Charger un module complémentaire temporaire…"** → sélectionne le .xpi
+        4. Active dans `about:addons` si nécessaire
+        5. ⚠️ Install temporaire = perdue à la fermeture Firefox
     - Chrome générique: [CORS Unblock](https://chrome.google.com/webstore/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino)
     - Firefox générique: [CORS Everywhere](https://addons.mozilla.org/firefox/addon/cors-everywhere/) (à activer manuellement, ne gère pas toujours les preflights)
 
