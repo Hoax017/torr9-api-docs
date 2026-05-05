@@ -1,0 +1,605 @@
+openapi: 3.0.3
+info:
+  title: Torr9 API (reverse-engineered)
+  version: 1.0.0
+  description: |
+    Spec OpenAPI reconstruite à partir des chunks JS (`/_next/static/chunks/`) et
+    de captures réseau. Méthodes HTTP inférées par convention quand non observées.
+    Champs réponse confirmés via fetch live pour `/auth/login` et `/torrents/exclus`.
+servers:
+  - url: https://api.torr9.net
+    description: Prod
+  - url: https://api.torr9.xyz
+    description: Dev/Staging
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+        remember_me: { type: boolean, default: true }
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string, description: 'JWT HS256, ~30j' }
+        user: { $ref: '#/components/schemas/User' }
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        email: { type: string, format: email }
+        role: { type: string, enum: [user, userplus, vip, admin] }
+        avatar_url: { type: string }
+        passkey: { type: string }
+        uploaded: { type: integer, format: int64 }
+        downloaded: { type: integer, format: int64 }
+        total_uploaded_bytes: { type: integer, format: int64 }
+        total_downloaded_bytes: { type: integer, format: int64 }
+        bonus_uploaded: { type: integer }
+        bonus_downloaded: { type: integer }
+        want_porn: { type: boolean }
+        hide_ratio: { type: boolean }
+        citation: { type: string }
+        jeton_balance: { type: integer }
+    Torrent:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string, description: BBCode }
+        file_size_bytes: { type: integer, format: int64 }
+        upload_date: { type: string, format: date-time }
+        is_freeleech: { type: boolean }
+        tags: { type: array, items: { type: string } }
+        category_name: { type: string }
+        parent_category_name: { type: string }
+        uploader_name: { type: string }
+        seeders: { type: integer }
+        leechers: { type: integer }
+        times_completed: { type: integer }
+        comment_count: { type: integer }
+        tmdb_id: { type: integer, nullable: true }
+        tvdb_id: { type: integer, nullable: true }
+        imdb_id: { type: string, nullable: true }
+        poster_url: { type: string, nullable: true }
+        tmdb_overview: { type: string, nullable: true }
+        team_name: { type: string, nullable: true }
+        team_slug: { type: string, nullable: true }
+        team_logo_url: { type: string, nullable: true }
+    TorrentList:
+      type: object
+      properties:
+        count: { type: integer }
+        torrents:
+          type: array
+          items: { $ref: '#/components/schemas/Torrent' }
+    UploadTorrentForm:
+      type: object
+      required: [torrent_file, title, category, subcategory, tags]
+      properties:
+        torrent_file: { type: string, format: binary }
+        title: { type: string }
+        description: { type: string, description: BBCode }
+        nfo: { type: string, format: binary, description: Optional .nfo file }
+        category: { type: string }
+        subcategory: { type: string }
+        tags: { type: string, description: 'Comma-separated' }
+        is_exclusive: { type: string, enum: ['true', 'false'] }
+        is_anonymous: { type: string, enum: ['true', 'false'] }
+        tmdb_id: { type: string }
+        imdb_id: { type: string }
+        tvdb_id: { type: string }
+        mal_id: { type: string }
+        igdb_id: { type: string }
+        mangadex_id: { type: string }
+    UploadTorrentResponse:
+      type: object
+      properties:
+        torrent_id: { type: integer }
+        download_url: { type: string, description: Path à concaténer avec baseURL }
+    ParseMetadataResponse:
+      type: object
+      properties:
+        release_name: { type: string }
+        size_bytes: { type: integer, format: int64 }
+        file_count: { type: integer }
+    ChatBanRequest:
+      type: object
+      required: [username]
+      properties:
+        username: { type: string }
+        duration: { type: integer, nullable: true, description: 'Secondes; null = perma' }
+    RequestsCreate:
+      type: object
+      required: [title, description, bounty_amount]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        bounty_amount: { type: integer, description: Jetons }
+    RequestsRespond:
+      type: object
+      required: [torrent_id, message]
+      properties:
+        torrent_id: { type: integer }
+        message: { type: string }
+    RequestsList:
+      type: object
+      properties:
+        requests: { type: array, items: { type: object } }
+        total: { type: integer }
+
+paths:
+  # ===== AUTH =====
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Token + user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '401': { description: Bad creds, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '403':
+          description: Banned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      ban_reason: { type: string }
+  /api/v1/auth/register:
+    post: { tags: [auth], summary: Register, security: [], responses: { '200': { description: OK } } }
+  /api/v1/auth/refresh:
+    post:
+      tags: [auth]
+      summary: Refresh JWT
+      responses:
+        '200':
+          description: New token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { token: { type: string } }
+  /api/v1/auth/forgot-password:
+    post: { tags: [auth], summary: Demande reset, security: [], responses: { '200': { description: OK } } }
+  /api/v1/auth/reset-password:
+    post: { tags: [auth], summary: Reset password, security: [], responses: { '200': { description: OK } } }
+  /api/v1/auth/discourse/connect:
+    get: { tags: [auth], summary: SSO Discourse, responses: { '200': { description: OK } } }
+
+  # ===== USERS =====
+  /api/v1/users/me:
+    get: { tags: [users], summary: Profil courant, responses: { '200': { description: User, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } } } }
+  /api/v1/users/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get: { tags: [users], summary: Profil public, responses: { '200': { description: OK } } }
+  /api/v1/users/{id}/avatar:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post: { tags: [users], summary: Upload avatar, requestBody: { content: { multipart/form-data: { schema: { type: object, properties: { file: { type: string, format: binary } } } } } }, responses: { '200': { description: OK } } }
+  /api/v1/users/{id}/email:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    patch: { tags: [users], summary: Change email, responses: { '200': { description: OK } } }
+  /api/v1/users/{id}/password:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    patch: { tags: [users], summary: Change mdp, responses: { '200': { description: OK } } }
+  /api/v1/users/{id}/want-porn:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    patch: { tags: [users], summary: Toggle want_porn, responses: { '200': { description: OK } } }
+  /api/v1/users/{id}/hide-ratio:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    patch: { tags: [users], summary: Toggle hide_ratio, responses: { '200': { description: OK } } }
+  /api/v1/users/{id}/citation:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    patch: { tags: [users], summary: Set citation, responses: { '200': { description: OK } } }
+  /api/v1/users/{id}/regenerate-passkey:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post: { tags: [users], summary: Régénère passkey, responses: { '200': { description: OK } } }
+
+  # ===== TORRENTS =====
+  /api/v1/torrents:
+    get:
+      tags: [torrents]
+      summary: List torrents
+      parameters:
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses:
+        '200': { description: Liste, content: { application/json: { schema: { $ref: '#/components/schemas/TorrentList' } } } }
+  /api/v1/torrents/recent:
+    get:
+      tags: [torrents]
+      summary: Récents
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TorrentList' } } } } }
+  /api/v1/torrents/exclus:
+    get:
+      tags: [torrents]
+      summary: Exclusivités (releases internes), fenêtre N jours
+      parameters:
+        - { name: days, in: query, schema: { type: integer, default: 14 }, description: 'Attention 524 si >2j sur origin lent' }
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TorrentList' } } } } }
+  /api/v1/torrents/search:
+    get:
+      tags: [torrents]
+      summary: Search
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+        - { name: search_in, in: query, schema: { type: string, enum: [title, description] } }
+        - { name: uploader, in: query, schema: { type: string } }
+        - { name: sort_by, in: query, schema: { type: string, enum: [created_at, seeders, size] } }
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TorrentList' } } } } }
+  /api/v1/torrents/upload:
+    post:
+      tags: [torrents]
+      summary: Upload .torrent
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/UploadTorrentForm' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadTorrentResponse' }
+  /api/v1/torrents/parse-metadata:
+    post:
+      tags: [torrents]
+      summary: Parse fichier .torrent (avant upload final)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [torrent_file]
+              properties:
+                torrent_file: { type: string, format: binary }
+      responses:
+        '200':
+          description: Metadata extraite
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ParseMetadataResponse' }
+  /api/v1/torrents/check-duplicate:
+    post: { tags: [torrents], summary: Vérifie doublon (infohash), responses: { '200': { description: OK } } }
+  /api/v1/torrents/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get: { tags: [torrents], summary: Détail, responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Torrent' } } } } } }
+  /api/v1/torrents/{id}/download:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get:
+      tags: [torrents]
+      summary: Télécharge fichier .torrent
+      responses:
+        '200':
+          description: Bytes
+          content:
+            application/x-bittorrent:
+              schema: { type: string, format: binary }
+  /api/v1/torrents/{id}/comments:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get:  { tags: [torrents], summary: Liste comments, responses: { '200': { description: OK } } }
+    post: { tags: [torrents], summary: Poste comment, responses: { '200': { description: OK } } }
+
+  # ===== RSS =====
+  /api/v1/rss/key:
+    get: { tags: [rss], summary: Récup passkey RSS, responses: { '200': { description: OK } } }
+  /api/v1/rss/recent:
+    get:
+      tags: [rss]
+      summary: Flux RSS récent
+      security: []
+      parameters:
+        - { name: passkey, in: query, required: true, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses: { '200': { description: RSS XML } }
+  /api/v1/rss/{category}:
+    parameters:
+      - { name: category, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [rss]
+      security: []
+      parameters:
+        - { name: passkey, in: query, required: true, schema: { type: string } }
+      responses: { '200': { description: RSS XML } }
+
+  # ===== INVITATIONS =====
+  /api/v1/invitation-codes/user:
+    get: { tags: [invitations], summary: Codes user, responses: { '200': { description: OK } } }
+
+  # ===== FEATURED =====
+  /api/v1/featured:
+    get:    { tags: [featured], summary: All featured, responses: { '200': { description: OK } } }
+    post:   { tags: [featured], summary: Create (admin), responses: { '200': { description: OK } } }
+  /api/v1/featured/movies:
+    get: { tags: [featured], responses: { '200': { description: OK } } }
+  /api/v1/featured/series:
+    get: { tags: [featured], responses: { '200': { description: OK } } }
+  /api/v1/featured/top-torrents:
+    get: { tags: [featured], responses: { '200': { description: OK } } }
+  /api/v1/featured/search:
+    get:
+      tags: [featured]
+      parameters:
+        - { name: query, in: query, required: true, schema: { type: string } }
+        - { name: type, in: query, schema: { type: string, enum: [movie, tv] } }
+      responses: { '200': { description: OK } }
+  /api/v1/featured/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    delete: { tags: [featured], summary: Delete (admin), responses: { '200': { description: OK } } }
+
+  # ===== IDEAS =====
+  /api/v1/ideas:
+    get:    { tags: [ideas], summary: List, responses: { '200': { description: OK } } }
+    post:   { tags: [ideas], summary: Create, responses: { '200': { description: OK } } }
+    delete: { tags: [ideas], summary: Delete, responses: { '200': { description: OK } } }
+  /api/v1/ideas/{id}/vote:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:   { tags: [ideas], summary: Upvote, responses: { '200': { description: OK } } }
+    delete: { tags: [ideas], summary: Unvote, responses: { '200': { description: OK } } }
+
+  # ===== JETONS =====
+  /api/v1/jetons:
+    get: { tags: [jetons], summary: Overview, responses: { '200': { description: OK } } }
+  /api/v1/jetons/history:
+    get: { tags: [jetons], responses: { '200': { description: OK } } }
+  /api/v1/jetons/shop:
+    get: { tags: [jetons], responses: { '200': { description: OK } } }
+  /api/v1/jetons/purchase:
+    post: { tags: [jetons], responses: { '200': { description: OK } } }
+
+  # ===== POOL =====
+  /api/v1/pool:
+    get: { tags: [pool], summary: Active pool, responses: { '200': { description: OK } } }
+  /api/v1/pool/donate:
+    post: { tags: [pool], responses: { '200': { description: OK } } }
+
+  # ===== SPONSOR AUCTION =====
+  /api/v1/sponsor-auction/state:
+    get: { tags: [sponsor-auction], responses: { '200': { description: OK } } }
+  /api/v1/sponsor-auction/bid:
+    post: { tags: [sponsor-auction], responses: { '200': { description: OK } } }
+  /api/v1/sponsor-auction/cancel:
+    post: { tags: [sponsor-auction], responses: { '200': { description: OK } } }
+  /api/v1/sponsored-torrents:
+    get: { tags: [sponsor-auction], summary: Liste sponsorisés, responses: { '200': { description: OK } } }
+
+  # ===== SHOP / EMOTES =====
+  /api/v1/shop/emotes:
+    get: { tags: [shop], summary: Emotes approuvées, responses: { '200': { description: OK } } }
+  /api/v1/shop/emotes/upload:
+    post: { tags: [shop], summary: Upload emote, responses: { '200': { description: OK } } }
+  /api/v1/shop/emotes/pending:
+    get: { tags: [shop], summary: En attente (admin), responses: { '200': { description: OK } } }
+  /api/v1/shop/emotes/{id}/approve:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post: { tags: [shop], responses: { '200': { description: OK } } }
+  /api/v1/shop/emotes/{id}/reject:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post: { tags: [shop], responses: { '200': { description: OK } } }
+
+  # ===== CHAT =====
+  /api/v1/chat/channels:
+    get: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/channels/{cid}/messages:
+    parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
+    get:  { tags: [chat], responses: { '200': { description: OK } } }
+    post: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/channels/{cid}/messages/{mid}:
+    parameters:
+      - { name: cid, in: path, required: true, schema: { type: string } }
+      - { name: mid, in: path, required: true, schema: { type: string } }
+    delete: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/channels/{cid}/messages/{mid}/reactions:
+    parameters:
+      - { name: cid, in: path, required: true, schema: { type: string } }
+      - { name: mid, in: path, required: true, schema: { type: string } }
+    post: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/channels/{cid}/messages/{mid}/reactions/{emoji}:
+    parameters:
+      - { name: cid, in: path, required: true, schema: { type: string } }
+      - { name: mid, in: path, required: true, schema: { type: string } }
+      - { name: emoji, in: path, required: true, schema: { type: string } }
+    delete: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/channels/{cid}/read:
+    parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
+    post: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/conversations:
+    get: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/conversations/{cid}:
+    parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
+    delete: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/conversations/{cid}/messages:
+    parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
+    get:  { tags: [chat], responses: { '200': { description: OK } } }
+    post: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/conversations/{cid}/messages/{mid}:
+    parameters:
+      - { name: cid, in: path, required: true, schema: { type: string } }
+      - { name: mid, in: path, required: true, schema: { type: string } }
+    delete: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/conversations/{cid}/messages/{mid}/reactions:
+    parameters:
+      - { name: cid, in: path, required: true, schema: { type: string } }
+      - { name: mid, in: path, required: true, schema: { type: string } }
+    post: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/conversations/{cid}/messages/{mid}/reactions/{emoji}:
+    parameters:
+      - { name: cid, in: path, required: true, schema: { type: string } }
+      - { name: mid, in: path, required: true, schema: { type: string } }
+      - { name: emoji, in: path, required: true, schema: { type: string } }
+    delete: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/conversations/{cid}/read:
+    parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
+    post: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/unread-counts:
+    get: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/upload-image:
+    post: { tags: [chat], responses: { '200': { description: OK } } }
+  /api/v1/chat/ban:
+    post:
+      tags: [chat]
+      summary: Ban user (mod)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatBanRequest' }
+      responses:
+        '200':
+          description: Banned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { username: { type: string } }
+  /api/v1/chat/unban:
+    post:
+      tags: [chat]
+      summary: Unban (mod)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties: { username: { type: string } }
+      responses: { '200': { description: OK } }
+
+  # ===== MISC =====
+  /api/v1/site/stats:
+    get: { tags: [misc], responses: { '200': { description: OK } } }
+  /api/v1/faq:
+    get: { tags: [misc], responses: { '200': { description: OK } } }
+  /api/v1/rules:
+    get: { tags: [misc], responses: { '200': { description: OK } } }
+  /api/v1/announcement:
+    get: { tags: [misc], responses: { '200': { description: OK } } }
+  /api/v1/leaderboard:
+    get: { tags: [misc], responses: { '200': { description: OK } } }
+  /api/v1/notifications/count:
+    get: { tags: [misc], responses: { '200': { description: OK } } }
+
+  # ===== REQUESTS =====
+  /api/v1/requests:
+    get:
+      tags: [requests]
+      summary: Liste demandes
+      parameters:
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: status, in: query, schema: { type: string, enum: [open, fulfilled, closed] } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RequestsList' }
+    post:
+      tags: [requests]
+      summary: Crée demande
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RequestsCreate' }
+      responses: { '200': { description: OK } }
+  /api/v1/requests/my:
+    get:
+      tags: [requests]
+      summary: Mes demandes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RequestsList' }
+  /api/v1/requests/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get:
+      tags: [requests]
+      summary: Détail demande + responses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses: { type: array, items: { type: object } }
+  /api/v1/requests/{id}/respond:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [requests]
+      summary: Répondre avec un torrent_id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RequestsRespond' }
+      responses: { '200': { description: OK } }
+  /api/v1/requests/{id}/responses/{rid}/accept:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+      - { name: rid, in: path, required: true, schema: { type: integer } }
+    post: { tags: [requests], responses: { '200': { description: OK } } }
+  /api/v1/requests/{id}/responses/{rid}/reject:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+      - { name: rid, in: path, required: true, schema: { type: integer } }
+    post: { tags: [requests], responses: { '200': { description: OK } } }
+  /api/v1/requests/{id}/cancel:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post: { tags: [requests], responses: { '200': { description: OK } } }
+
+  # ===== POLLS (admin + vote) =====
+  /api/v1/polls:
+    get:  { tags: [polls], summary: Sondages actifs, responses: { '200': { description: OK } } }
+  /api/v1/polls/{id}/vote:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [polls]
+      summary: Vote sur sondage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                option_id: { type: integer }
+      responses: { '200': { description: OK } }
+  /api/v1/admin/polls:
+    post: { tags: [polls, admin], summary: Crée sondage (admin), responses: { '200': { description: OK } } }
+  /api/v1/admin/polls/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    delete: { tags: [polls, admin], responses: { '200': { description: OK } } }
+  /api/v1/admin/polls/{id}/close:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post: { tags: [polls, admin], summary: Clôture sondage, responses: { '200': { description: OK } } }
