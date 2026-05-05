@@ -216,11 +216,43 @@ components:
       properties:
         torrent_id: { type: integer }
         message: { type: string }
+    Request:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        title: { type: string }
+        description: { type: string }
+        bounty_amount: { type: integer, description: 'jetons' }
+        status: { type: string, enum: [open, fulfilled, closed, cancelled] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        response_count: { type: integer, nullable: true }
+        fulfilled_by: { type: integer, nullable: true }
+        fulfilled_by_name: { type: string, nullable: true }
+        fulfilled_at: { type: string, format: date-time, nullable: true }
+    RequestResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        request_id: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        torrent_id: { type: integer }
+        torrent_title: { type: string }
+        message: { type: string }
+        status: { type: string, enum: [pending, accepted, rejected] }
+        created_at: { type: string, format: date-time }
     RequestsList:
       type: object
       properties:
-        requests: { type: array, items: { type: object } }
+        page: { type: integer }
+        per_page: { type: integer }
         total: { type: integer }
+        requests:
+          type: array
+          items: { $ref: '#/components/schemas/Request' }
     PublicUser:
       type: object
       description: Profil public (pas d'email/role)
@@ -442,7 +474,10 @@ components:
                   properties:
                     id: { type: integer }
                     question: { type: string }
-                    answer: { type: string }
+                    answer: { type: string, description: 'Markdown ou HTML selon entry' }
+                    category: { type: string }
+                    sort_order: { type: integer }
+                    is_active: { type: boolean }
     Rules:
       type: object
       properties:
@@ -459,7 +494,10 @@ components:
                   properties:
                     id: { type: integer }
                     title: { type: string }
-                    content: { type: string }
+                    content: { type: string, description: HTML }
+                    category: { type: string }
+                    sort_order: { type: integer }
+                    is_active: { type: boolean }
     SponsoredTorrentsList:
       type: object
       properties:
@@ -1354,7 +1392,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  responses: { type: array, items: { type: object } }
+                  request: { $ref: '#/components/schemas/Request' }
+                  responses:
+                    type: array
+                    items: { $ref: '#/components/schemas/RequestResponse' }
   /api/v1/requests/{id}/respond:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     post:
