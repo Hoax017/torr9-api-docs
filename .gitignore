@@ -6,3 +6,4 @@ node_modules/
 .DS_Store
 torr9-*.js
 *.xpi
+torr9-cors-unlock-chrome.zip

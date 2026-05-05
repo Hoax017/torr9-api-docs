@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Torr9 CORS Unlock",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Bypass CORS sur api.torr9.net en interceptant fetch/XHR via content script + background. Active uniquement sur les pages de doc.",
   "permissions": [
     "*://api.torr9.net/*"
@@ -24,7 +24,10 @@
   "web_accessible_resources": ["inject.js"],
   "browser_specific_settings": {
     "gecko": {
-      "id": "torr9-cors@hoax017"
+      "id": "torr9-cors@hoax017",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }

@@ -14,14 +14,18 @@ info:
 
     Pour tester en live depuis ici, installe une extension de désactivation CORS:
 
-    - **Firefox dédié (recommandé)**: [Torr9 CORS Unlock](https://github.com/Hoax017/torr9-api-docs/releases/latest) — extension custom qui spoofe l'Origin uniquement pour `api.torr9.net`. **Install obligatoirement via `about:debugging`** (Firefox bloque les .xpi non signés en direct):
+    - **Firefox dédié (recommandé)** — [Torr9 CORS Unlock (.xpi signé)](https://github.com/Hoax017/torr9-api-docs/releases/latest)
         1. Télécharge `torr9-cors-unlock.xpi` depuis la release
-        2. Ouvre `about:debugging#/runtime/this-firefox`
-        3. Clic **"Charger un module complémentaire temporaire…"** → sélectionne le .xpi
-        4. Active dans `about:addons` si nécessaire
-        5. ⚠️ Install temporaire = perdue à la fermeture Firefox
+        2. Ouvre Firefox → glisse-dépose le .xpi sur l'onglet `about:addons` (ou clique le `.xpi` dans Firefox direct)
+        3. Confirme l'install
+        4. Reste active jusqu'à suppression manuelle
+    - **Chrome / Edge / Brave dédié** — [Torr9 CORS Unlock (.zip)](https://github.com/Hoax017/torr9-api-docs/releases/latest)
+        1. Télécharge le `.zip` depuis la release et dezip
+        2. `chrome://extensions/` → toggle **"Mode développeur"**
+        3. **"Charger l'extension non empaquetée"** → sélectionne le dossier dezippé
+        4. Reste active jusqu'à suppression manuelle
     - Chrome générique: [CORS Unblock](https://chrome.google.com/webstore/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino)
-    - Firefox générique: [CORS Everywhere](https://addons.mozilla.org/firefox/addon/cors-everywhere/) (à activer manuellement, ne gère pas toujours les preflights)
+    - Firefox générique: [CORS Everywhere](https://addons.mozilla.org/firefox/addon/cors-everywhere/) (ne gère pas toujours les preflights)
 
     Active l'extension uniquement le temps des tests, puis désactive-la (sécurité).
     Alternative: appelle l'API en `curl` ou Node avec ton token.

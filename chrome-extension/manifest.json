@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Torr9 CORS Unlock",
+  "version": "2.1.1",
+  "description": "Bypass CORS sur api.torr9.net pour tester la doc OpenAPI Try-it.",
+  "permissions": [
+    "declarativeNetRequest",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://api.torr9.net/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://hoax017.github.io/*",
+        "*://127.0.0.1/*",
+        "*://localhost/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js"],
+      "matches": [
+        "*://hoax017.github.io/*",
+        "*://127.0.0.1/*",
+        "*://localhost/*"
+      ]
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "torr9_origin_rules",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
+}
