@@ -13,8 +13,10 @@ info:
     Les requêtes envoyées depuis cette page (github.io ou localhost) sont **bloquées par le navigateur**.
 
     Pour tester en live depuis ici, installe une extension de désactivation CORS:
-    - Chrome: [CORS Unblock](https://chrome.google.com/webstore/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino)
-    - Firefox: [CORS Everywhere](https://addons.mozilla.org/firefox/addon/cors-everywhere/)
+
+    - **Firefox dédié (recommandé)**: [Torr9 CORS Unlock](https://github.com/Hoax017/torr9-api-docs/releases/latest) — extension custom qui spoofe l'Origin uniquement pour `api.torr9.net`. Télécharge le `.xpi` puis drag-drop sur `about:addons` (ou install temporaire via `about:debugging`).
+    - Chrome générique: [CORS Unblock](https://chrome.google.com/webstore/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino)
+    - Firefox générique: [CORS Everywhere](https://addons.mozilla.org/firefox/addon/cors-everywhere/) (à activer manuellement, ne gère pas toujours les preflights)
 
     Active l'extension uniquement le temps des tests, puis désactive-la (sécurité).
     Alternative: appelle l'API en `curl` ou Node avec ton token.
