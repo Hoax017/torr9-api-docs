@@ -1,0 +1,351 @@
+[
+  {
+    "id": 1,
+    "name": "Films",
+    "slug": "film",
+    "icon": "film",
+    "type": "movie",
+    "children": [
+      {
+        "id": 2,
+        "name": "Films d'animation",
+        "slug": "movieanim"
+      },
+      {
+        "id": 3,
+        "name": "Documentaires",
+        "slug": "docs"
+      },
+      {
+        "id": 51,
+        "name": "Films",
+        "slug": "movie"
+      },
+      {
+        "id": 52,
+        "name": "Concert",
+        "slug": "concert"
+      },
+      {
+        "id": 53,
+        "name": "Spectacle",
+        "slug": "spectacle"
+      },
+      {
+        "id": 54,
+        "name": "Sport",
+        "slug": "sport"
+      },
+      {
+        "id": 55,
+        "name": "Vidéo-clips",
+        "slug": "videoclips"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Séries",
+    "slug": "tv",
+    "icon": "film",
+    "type": "tv",
+    "children": [
+      {
+        "id": 5,
+        "name": "Séries TV",
+        "slug": "series-tv"
+      },
+      {
+        "id": 6,
+        "name": "Emission TV",
+        "slug": "broadcast"
+      },
+      {
+        "id": 7,
+        "name": "Séries Animées",
+        "slug": "animes"
+      },
+      {
+        "id": 68,
+        "name": "Mangas-Animes",
+        "slug": "manga-anime"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Audio",
+    "slug": "audio",
+    "icon": "music",
+    "type": "music",
+    "children": [
+      {
+        "id": 9,
+        "name": "Musique",
+        "slug": "music"
+      },
+      {
+        "id": 10,
+        "name": "Podcasts",
+        "slug": "podcast"
+      },
+      {
+        "id": 12,
+        "name": "Karaoké",
+        "slug": "karaoke"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Livres",
+    "slug": "book",
+    "icon": "book",
+    "type": "book",
+    "children": [
+      {
+        "id": 14,
+        "name": "Livres papiers & eBooks",
+        "slug": "ebooks"
+      },
+      {
+        "id": 16,
+        "name": "BD",
+        "slug": "bd"
+      },
+      {
+        "id": 17,
+        "name": "Comics",
+        "slug": "comics"
+      },
+      {
+        "id": 18,
+        "name": "Mangas",
+        "slug": "manga"
+      },
+      {
+        "id": 31,
+        "name": "Formation",
+        "slug": "formation"
+      },
+      {
+        "id": 65,
+        "name": "Livres Audios",
+        "slug": "audiobook"
+      },
+      {
+        "id": 67,
+        "name": "Magazine",
+        "slug": "magazine"
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Jeux-vidéos",
+    "slug": "game",
+    "icon": "game",
+    "type": "game",
+    "children": [
+      {
+        "id": 20,
+        "name": "Autres",
+        "slug": "g-other"
+      },
+      {
+        "id": 21,
+        "name": "Linux",
+        "slug": "g-linux"
+      },
+      {
+        "id": 22,
+        "name": "MacOS",
+        "slug": "g-macos"
+      },
+      {
+        "id": 23,
+        "name": "Microsoft",
+        "slug": "g-microsoft"
+      },
+      {
+        "id": 24,
+        "name": "Nintendo",
+        "slug": "g-nintendo"
+      },
+      {
+        "id": 26,
+        "name": "Sony",
+        "slug": "g-sony"
+      },
+      {
+        "id": 28,
+        "name": "Windows",
+        "slug": "g-windows"
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "name": "Applications",
+    "slug": "app",
+    "icon": "app",
+    "type": "other",
+    "children": [
+      {
+        "id": 30,
+        "name": "Autres",
+        "slug": "other"
+      },
+      {
+        "id": 32,
+        "name": "Linux",
+        "slug": "linux"
+      },
+      {
+        "id": 33,
+        "name": "MacOS",
+        "slug": "macos"
+      },
+      {
+        "id": 36,
+        "name": "Windows",
+        "slug": "windows"
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "name": "NULLED",
+    "slug": "nulled",
+    "icon": "code",
+    "type": "other",
+    "children": [
+      {
+        "id": 38,
+        "name": "Divers",
+        "slug": "other"
+      },
+      {
+        "id": 39,
+        "name": "Mobile",
+        "slug": "mobile"
+      },
+      {
+        "id": 40,
+        "name": "Scripts",
+        "slug": "script"
+      },
+      {
+        "id": 41,
+        "name": "Wordpress",
+        "slug": "wordpress"
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "name": "Emulation",
+    "slug": "emulation",
+    "icon": "chip",
+    "type": "other",
+    "children": [
+      {
+        "id": 43,
+        "name": "Emulateur",
+        "slug": "emulator"
+      },
+      {
+        "id": 44,
+        "name": "ROM / ISO",
+        "slug": "rom"
+      }
+    ]
+  },
+  {
+    "id": 69,
+    "name": "Impression 3D",
+    "slug": "impression-3d",
+    "icon": "cube",
+    "type": "other",
+    "children": [
+      {
+        "id": 70,
+        "name": "Personnages",
+        "slug": "personnages-3d"
+      },
+      {
+        "id": 71,
+        "name": "Objets 3D",
+        "slug": "objets-3d"
+      },
+      {
+        "id": 72,
+        "name": "Pack",
+        "slug": "pack-3d"
+      }
+    ]
+  },
+  {
+    "id": 73,
+    "name": "VO",
+    "slug": "vo",
+    "icon": "globe",
+    "type": "other",
+    "children": [
+      {
+        "id": 74,
+        "name": "Films",
+        "slug": "films-vo"
+      },
+      {
+        "id": 75,
+        "name": "Séries",
+        "slug": "series-vo"
+      },
+      {
+        "id": 76,
+        "name": "Livres",
+        "slug": "livres-vo"
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "name": "XXX",
+    "slug": "xxx",
+    "icon": "xxx",
+    "type": "other",
+    "children": [
+      {
+        "id": 46,
+        "name": "Films/Vidéos +18",
+        "slug": "xxx-film"
+      },
+      {
+        "id": 47,
+        "name": "Images +18",
+        "slug": "xxx-image"
+      },
+      {
+        "id": 48,
+        "name": "Jeux +18",
+        "slug": "xxx-game"
+      },
+      {
+        "id": 49,
+        "name": "Ebooks +18",
+        "slug": "xxx-book"
+      },
+      {
+        "id": 50,
+        "name": "Hentai +18",
+        "slug": "hentai"
+      },
+      {
+        "id": 66,
+        "name": "FanSite +18",
+        "slug": "xxx-fansite"
+      }
+    ]
+  }
+]

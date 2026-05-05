@@ -142,6 +142,261 @@ components:
       properties:
         requests: { type: array, items: { type: object } }
         total: { type: integer }
+    PublicUser:
+      type: object
+      description: Profil public (pas d'email/role)
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        avatar_url: { type: string }
+        total_uploaded_bytes: { type: integer, format: int64 }
+        total_downloaded_bytes: { type: integer, format: int64 }
+        bonus_uploaded: { type: integer, format: int64 }
+        bonus_downloaded: { type: integer, format: int64 }
+        created_at: { type: string, format: date-time }
+    ChatChannel:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [public, private, restricted] }
+        icon: { type: string }
+        sort_order: { type: integer }
+        created_at: { type: string, format: date-time }
+    ChatMessage:
+      type: object
+      properties:
+        id: { type: integer }
+        channel_id: { type: integer }
+        user_id: { type: integer }
+        content: { type: string }
+        reply_to_id: { type: integer, nullable: true }
+        created_at: { type: string, format: date-time }
+        username: { type: string }
+        avatar_url: { type: string }
+        role: { type: string }
+        reactions: { type: array, items: { type: object } }
+        reply_to:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            content: { type: string }
+            username: { type: string }
+    ChatMessages:
+      type: object
+      properties:
+        has_more: { type: boolean }
+        messages: { type: array, items: { $ref: '#/components/schemas/ChatMessage' } }
+    Idea:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        content: { type: string }
+        vote_count: { type: integer }
+        upvotes: { type: integer }
+        downvotes: { type: integer }
+        has_voted: { type: boolean }
+        user_vote: { type: integer, description: '-1, 0, 1' }
+        created_at: { type: string, format: date-time }
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        avatar_url: { type: string }
+        role: { type: string }
+        torrents_uploaded: { type: integer }
+        total_uploaded_bytes: { type: integer, format: int64 }
+        jeton_balance: { type: integer }
+        composite_score: { type: number, format: float }
+    SiteStats:
+      type: object
+      properties:
+        active_torrents: { type: integer }
+        pending_torrents: { type: integer }
+        sw_torrents: { type: integer, description: 'ShareWood torrents' }
+        total_data_exchanged: { type: integer, format: int64 }
+        crossseed_data_exchanged: { type: integer, format: int64 }
+        total_peers: { type: integer }
+        users: { type: integer }
+    NotificationsCount:
+      type: object
+      properties: { unread: { type: integer } }
+    Announcement:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        message: { type: string, description: HTML }
+    PoolDonor:
+      type: object
+      properties:
+        username: { type: string }
+        amount: { type: integer }
+    PoolStatus:
+      type: object
+      properties:
+        pool:
+          type: object
+          properties:
+            id: { type: integer }
+            goal_amount: { type: integer }
+            current_amount: { type: integer }
+            status: { type: string, enum: [active, completed, closed] }
+            created_at: { type: string, format: date-time }
+        top_donors:
+          type: array
+          items: { $ref: '#/components/schemas/PoolDonor' }
+    AuctionSlot:
+      type: object
+      properties:
+        slot_type: { type: string, enum: [uploader, userplus] }
+        total_slots: { type: integer }
+        occupied_slots: { type: integer }
+        active_bids: { type: array, items: { type: object } }
+        pending_bids: { type: array, items: { type: object } }
+    AuctionState:
+      type: object
+      properties:
+        uploader_slots: { $ref: '#/components/schemas/AuctionSlot' }
+        userplus_slots: { $ref: '#/components/schemas/AuctionSlot' }
+        min_bid_amount: { type: integer }
+    EarnRule:
+      type: object
+      properties:
+        action: { type: string }
+        description: { type: string }
+        amount: { type: string }
+        icon: { type: string }
+    JetonsMilestone:
+      type: object
+      properties:
+        count: { type: integer }
+        reward: { type: integer }
+        reached: { type: boolean }
+        label: { type: string }
+    JetonsOverview:
+      type: object
+      properties:
+        balance: { type: integer }
+        earn_rules: { type: array, items: { $ref: '#/components/schemas/EarnRule' } }
+        milestones: { type: array, items: { $ref: '#/components/schemas/JetonsMilestone' } }
+        total_earned: { type: integer }
+        total_spent: { type: integer }
+        upload_count: { type: integer }
+    JetonsShopItem:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        price: { type: integer }
+        category: { type: string }
+        effect_type: { type: string }
+        effect_value: { type: integer, format: int64 }
+        is_active: { type: boolean }
+        sort_order: { type: integer }
+        max_purchases: { type: integer }
+        user_purchase_count: { type: integer }
+    JetonsShop:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/JetonsShopItem' } }
+        shop_enabled: { type: boolean }
+    JetonsHistory:
+      type: object
+      properties:
+        page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        transactions: { type: array, items: { type: object } }
+    FeaturedItem:
+      type: object
+      properties:
+        id: { type: integer }
+        type: { type: string, enum: [movie, tv] }
+        tmdb_id: { type: integer }
+        torrent_id: { type: integer }
+        display_order: { type: integer }
+        is_active: { type: boolean }
+        poster_url: { type: string }
+        title: { type: string }
+    FeaturedList:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/FeaturedItem' } }
+    InvitationCodes:
+      type: object
+      properties:
+        codes: { type: array, items: { type: object } }
+        remaining: { type: integer }
+    CommentList:
+      type: object
+      properties:
+        comments: { type: array, items: { type: object }, nullable: true }
+        count: { type: integer }
+    UnreadCounts:
+      type: object
+      properties:
+        channels: { type: object, additionalProperties: { type: integer } }
+        conversations: { type: object, additionalProperties: { type: integer } }
+        total_unread: { type: integer }
+    FAQ:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer }
+                    question: { type: string }
+                    answer: { type: string }
+    Rules:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer }
+                    title: { type: string }
+                    content: { type: string }
+    SponsoredTorrentsList:
+      type: object
+      properties:
+        torrents: { type: array, items: { type: object } }
+    EmotesList:
+      type: object
+      properties:
+        emotes: { type: array, items: { type: object } }
+    PollsList:
+      type: object
+      properties:
+        polls: { type: array, items: { type: object }, nullable: true }
+    RssKey:
+      type: object
+      properties:
+        rss_key: { type: string }
 
 paths:
   # ===== AUTH =====
@@ -173,11 +428,29 @@ paths:
                     properties:
                       ban_reason: { type: string }
   /api/v1/auth/register:
-    post: { tags: [auth], summary: Register, security: [], responses: { '200': { description: OK } } }
+    post:
+      tags: [auth]
+      summary: Register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password, invitation_code]
+              properties:
+                username: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                invitation_code: { type: string }
+                captcha_token: { type: string }
+      responses:
+        '201': { description: Created }
   /api/v1/auth/refresh:
     post:
       tags: [auth]
-      summary: Refresh JWT
+      summary: Refresh JWT (pas de body, juste Bearer)
       responses:
         '200':
           description: New token
@@ -185,20 +458,61 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { token: { type: string } }
+                properties:
+                  token: { type: string }
+                  message: { type: string }
   /api/v1/auth/forgot-password:
-    post: { tags: [auth], summary: Demande reset, security: [], responses: { '200': { description: OK } } }
+    post:
+      tags: [auth]
+      summary: Demande reset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses: { '200': { description: OK } }
   /api/v1/auth/reset-password:
-    post: { tags: [auth], summary: Reset password, security: [], responses: { '200': { description: OK } } }
+    post:
+      tags: [auth]
+      summary: Reset password (token reçu par email)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, format: password }
+      responses: { '200': { description: OK } }
   /api/v1/auth/discourse/connect:
-    get: { tags: [auth], summary: SSO Discourse, responses: { '200': { description: OK } } }
+    get:
+      tags: [auth]
+      summary: SSO Discourse (GET retourne 404, probablement POST)
+      responses:
+        '404': { description: 'Probably wrong method (try POST)' }
 
   # ===== USERS =====
   /api/v1/users/me:
     get: { tags: [users], summary: Profil courant, responses: { '200': { description: User, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } } } }
   /api/v1/users/{id}:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
-    get: { tags: [users], summary: Profil public, responses: { '200': { description: OK } } }
+    get:
+      tags: [users]
+      summary: Profil public
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicUser' }
   /api/v1/users/{id}/avatar:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     post: { tags: [users], summary: Upload avatar, requestBody: { content: { multipart/form-data: { schema: { type: object, properties: { file: { type: string, format: binary } } } } } }, responses: { '200': { description: OK } } }
@@ -288,7 +602,28 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ParseMetadataResponse' }
   /api/v1/torrents/check-duplicate:
-    post: { tags: [torrents], summary: Vérifie doublon (infohash), responses: { '200': { description: OK } } }
+    post:
+      tags: [torrents]
+      summary: Vérifie doublon par titre
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  has_duplicates: { type: boolean }
+                  duplicates: { type: array, items: { type: object } }
   /api/v1/torrents/{id}:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     get: { tags: [torrents], summary: Détail, responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Torrent' } } } } } }
@@ -305,12 +640,28 @@ paths:
               schema: { type: string, format: binary }
   /api/v1/torrents/{id}/comments:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
-    get:  { tags: [torrents], summary: Liste comments, responses: { '200': { description: OK } } }
+    get:
+      tags: [torrents]
+      summary: Liste comments
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommentList' }
     post: { tags: [torrents], summary: Poste comment, responses: { '200': { description: OK } } }
 
   # ===== RSS =====
   /api/v1/rss/key:
-    get: { tags: [rss], summary: Récup passkey RSS, responses: { '200': { description: OK } } }
+    get:
+      tags: [rss]
+      summary: Récup passkey RSS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RssKey' }
   /api/v1/rss/recent:
     get:
       tags: [rss]
@@ -332,34 +683,132 @@ paths:
 
   # ===== INVITATIONS =====
   /api/v1/invitation-codes/user:
-    get: { tags: [invitations], summary: Codes user, responses: { '200': { description: OK } } }
+    get:
+      tags: [invitations]
+      summary: Codes user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvitationCodes' }
 
   # ===== FEATURED =====
   /api/v1/featured:
-    get:    { tags: [featured], summary: All featured, responses: { '200': { description: OK } } }
-    post:   { tags: [featured], summary: Create (admin), responses: { '200': { description: OK } } }
+    get:
+      tags: [featured, admin]
+      summary: All featured (admin only — 'Admin access required' sinon)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+    post:
+      tags: [featured, admin]
+      summary: Create featured (admin only — 'Admin access required' sinon)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 'Schéma exact non observé (admin-gated). Probable: { type: movie|tv, tmdb_id, ... }'
+      responses: { '200': { description: OK } }
   /api/v1/featured/movies:
-    get: { tags: [featured], responses: { '200': { description: OK } } }
-  /api/v1/featured/series:
-    get: { tags: [featured], responses: { '200': { description: OK } } }
-  /api/v1/featured/top-torrents:
-    get: { tags: [featured], responses: { '200': { description: OK } } }
-  /api/v1/featured/search:
     get:
       tags: [featured]
+      summary: Films mis en avant (public)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FeaturedList' }
+  /api/v1/featured/series:
+    get:
+      tags: [featured]
+      summary: Séries mises en avant (public)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FeaturedList' }
+  /api/v1/featured/top-torrents:
+    get:
+      tags: [featured, admin]
+      summary: Top torrents (admin only)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/featured/search:
+    get:
+      tags: [featured, admin]
+      summary: Recherche TMDB pour featured (admin only)
       parameters:
         - { name: query, in: query, required: true, schema: { type: string } }
         - { name: type, in: query, schema: { type: string, enum: [movie, tv] } }
-      responses: { '200': { description: OK } }
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
   /api/v1/featured/{id}:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     delete: { tags: [featured], summary: Delete (admin), responses: { '200': { description: OK } } }
 
   # ===== IDEAS =====
   /api/v1/ideas:
-    get:    { tags: [ideas], summary: List, responses: { '200': { description: OK } } }
-    post:   { tags: [ideas], summary: Create, responses: { '200': { description: OK } } }
-    delete: { tags: [ideas], summary: Delete, responses: { '200': { description: OK } } }
+    get:
+      tags: [ideas]
+      summary: List ideas
+      responses:
+        '200':
+          description: Liste triée par votes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Idea' }
+    post:
+      tags: [ideas]
+      summary: Create idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string, minLength: 3 }
+      responses:
+        '200':
+          description: Idea créée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer }
+                  user_id: { type: integer }
+                  username: { type: string }
+                  content: { type: string }
+                  vote_count: { type: integer }
+                  upvotes: { type: integer }
+                  downvotes: { type: integer }
+                  has_voted: { type: boolean }
+                  user_vote: { type: integer }
+                  created_at: { type: string, format: date-time }
+    delete:
+      tags: [ideas]
+      summary: Delete idea (body JSON requis — non-standard)
+      description: '⚠️ L''API attend un body JSON sur DELETE (non-standard OpenAPI). Swagger UI strict refuse le rendu — utilise Redoc.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties: { id: { type: integer } }
+      responses: { '200': { description: 'Idée supprimée' } }
   /api/v1/ideas/{id}/vote:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     post:   { tags: [ideas], summary: Upvote, responses: { '200': { description: OK } } }
@@ -367,37 +816,173 @@ paths:
 
   # ===== JETONS =====
   /api/v1/jetons:
-    get: { tags: [jetons], summary: Overview, responses: { '200': { description: OK } } }
+    get:
+      tags: [jetons]
+      summary: Overview (balance + earn rules + milestones)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JetonsOverview' }
   /api/v1/jetons/history:
-    get: { tags: [jetons], responses: { '200': { description: OK } } }
+    get:
+      tags: [jetons]
+      summary: Historique transactions
+      parameters:
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JetonsHistory' }
   /api/v1/jetons/shop:
-    get: { tags: [jetons], responses: { '200': { description: OK } } }
+    get:
+      tags: [jetons]
+      summary: Items du shop
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JetonsShop' }
   /api/v1/jetons/purchase:
-    post: { tags: [jetons], responses: { '200': { description: OK } } }
+    post:
+      tags: [jetons]
+      summary: Achète item shop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [item_slug]
+              properties:
+                item_slug: { type: string }
+                torrent_id: { type: integer, description: Optionnel selon item }
+      responses: { '200': { description: OK } }
 
   # ===== POOL =====
   /api/v1/pool:
-    get: { tags: [pool], summary: Active pool, responses: { '200': { description: OK } } }
+    get:
+      tags: [pool]
+      summary: Active pool + top donateurs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoolStatus' }
   /api/v1/pool/donate:
-    post: { tags: [pool], responses: { '200': { description: OK } } }
+    post:
+      tags: [pool]
+      summary: Don à la pool
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: integer, minimum: 1 }
+      responses: { '200': { description: OK } }
 
   # ===== SPONSOR AUCTION =====
   /api/v1/sponsor-auction/state:
-    get: { tags: [sponsor-auction], responses: { '200': { description: OK } } }
+    get:
+      tags: [sponsor-auction]
+      summary: État enchères + bids actives/pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuctionState' }
   /api/v1/sponsor-auction/bid:
-    post: { tags: [sponsor-auction], responses: { '200': { description: OK } } }
+    post:
+      tags: [sponsor-auction]
+      summary: Enchérir sur torrent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [torrent_id, bid_amount]
+              properties:
+                torrent_id: { type: integer }
+                bid_amount: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
   /api/v1/sponsor-auction/cancel:
-    post: { tags: [sponsor-auction], responses: { '200': { description: OK } } }
+    post:
+      tags: [sponsor-auction]
+      summary: Annule enchère
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bid_id]
+              properties:
+                bid_id: { type: integer }
+      responses: { '200': { description: OK } }
   /api/v1/sponsored-torrents:
-    get: { tags: [sponsor-auction], summary: Liste sponsorisés, responses: { '200': { description: OK } } }
+    get:
+      tags: [sponsor-auction]
+      summary: Liste sponsorisés
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SponsoredTorrentsList' }
 
   # ===== SHOP / EMOTES =====
   /api/v1/shop/emotes:
-    get: { tags: [shop], summary: Emotes approuvées, responses: { '200': { description: OK } } }
+    get:
+      tags: [shop]
+      summary: Emotes approuvées
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EmotesList' }
   /api/v1/shop/emotes/upload:
-    post: { tags: [shop], summary: Upload emote, responses: { '200': { description: OK } } }
+    post:
+      tags: [shop]
+      summary: Upload emote (image — nécessite achat préalable d'un slot)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image: { type: string, format: binary }
+                name: { type: string }
+      responses:
+        '200': { description: OK }
+        '400': { description: 'Aucun achat d''emote disponible' }
   /api/v1/shop/emotes/pending:
-    get: { tags: [shop], summary: En attente (admin), responses: { '200': { description: OK } } }
+    get:
+      tags: [shop, admin]
+      summary: Emotes en attente (staff only)
+      responses:
+        '200': { description: OK }
+        '403': { description: Staff access required }
   /api/v1/shop/emotes/{id}/approve:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     post: { tags: [shop], responses: { '200': { description: OK } } }
@@ -407,11 +992,44 @@ paths:
 
   # ===== CHAT =====
   /api/v1/chat/channels:
-    get: { tags: [chat], responses: { '200': { description: OK } } }
+    get:
+      tags: [chat]
+      summary: Liste des channels
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ChatChannel' }
   /api/v1/chat/channels/{cid}/messages:
-    parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
-    get:  { tags: [chat], responses: { '200': { description: OK } } }
-    post: { tags: [chat], responses: { '200': { description: OK } } }
+    parameters: [{ name: cid, in: path, required: true, schema: { type: string }, description: 'slug du channel (ex: general)' }]
+    get:
+      tags: [chat]
+      summary: Messages du channel
+      parameters:
+        - { name: before, in: query, schema: { type: integer }, description: 'message id (pagination)' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatMessages' }
+    post:
+      tags: [chat]
+      summary: Poste un message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+                reply_to_id: { type: integer }
+      responses: { '200': { description: OK } }
   /api/v1/chat/channels/{cid}/messages/{mid}:
     parameters:
       - { name: cid, in: path, required: true, schema: { type: string } }
@@ -432,7 +1050,17 @@ paths:
     parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
     post: { tags: [chat], responses: { '200': { description: OK } } }
   /api/v1/chat/conversations:
-    get: { tags: [chat], responses: { '200': { description: OK } } }
+    get:
+      tags: [chat]
+      summary: Liste DM
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object }
   /api/v1/chat/conversations/{cid}:
     parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
     delete: { tags: [chat], responses: { '200': { description: OK } } }
@@ -460,9 +1088,31 @@ paths:
     parameters: [{ name: cid, in: path, required: true, schema: { type: string } }]
     post: { tags: [chat], responses: { '200': { description: OK } } }
   /api/v1/chat/unread-counts:
-    get: { tags: [chat], responses: { '200': { description: OK } } }
+    get:
+      tags: [chat]
+      summary: Compteurs unread (channels + DM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UnreadCounts' }
   /api/v1/chat/upload-image:
-    post: { tags: [chat], responses: { '200': { description: OK } } }
+    post:
+      tags: [chat]
+      summary: Upload image dans chat (max 2MB)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image: { type: string, format: binary, description: Max 2MB }
+      responses:
+        '200': { description: OK }
+        '413': { description: 'Fichier trop volumineux (max 2MB)' }
   /api/v1/chat/ban:
     post:
       tags: [chat]
@@ -495,17 +1145,67 @@ paths:
 
   # ===== MISC =====
   /api/v1/site/stats:
-    get: { tags: [misc], responses: { '200': { description: OK } } }
+    get:
+      tags: [misc]
+      summary: Stats globales site
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SiteStats' }
   /api/v1/faq:
-    get: { tags: [misc], responses: { '200': { description: OK } } }
+    get:
+      tags: [misc]
+      summary: FAQ groupée par catégorie
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FAQ' }
   /api/v1/rules:
-    get: { tags: [misc], responses: { '200': { description: OK } } }
+    get:
+      tags: [misc]
+      summary: Règles
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Rules' }
   /api/v1/announcement:
-    get: { tags: [misc], responses: { '200': { description: OK } } }
+    get:
+      tags: [misc]
+      summary: Bandeau global
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Announcement' }
   /api/v1/leaderboard:
-    get: { tags: [misc], responses: { '200': { description: OK } } }
+    get:
+      tags: [misc]
+      summary: Top users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LeaderboardEntry' }
   /api/v1/notifications/count:
-    get: { tags: [misc], responses: { '200': { description: OK } } }
+    get:
+      tags: [misc]
+      summary: Notifications non lues
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationsCount' }
 
   # ===== REQUESTS =====
   /api/v1/requests:
@@ -581,22 +1281,56 @@ paths:
 
   # ===== POLLS (admin + vote) =====
   /api/v1/polls:
-    get:  { tags: [polls], summary: Sondages actifs, responses: { '200': { description: OK } } }
+    get:
+      tags: [polls]
+      summary: Sondages actifs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PollsList' }
   /api/v1/polls/{id}/vote:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     post:
       tags: [polls]
-      summary: Vote sur sondage
+      summary: Vote sur sondage (multi-questions/multi-options)
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [question_id, option_ids]
               properties:
-                option_id: { type: integer }
+                question_id: { type: integer }
+                option_ids: { type: array, items: { type: integer } }
       responses: { '200': { description: OK } }
   /api/v1/admin/polls:
-    post: { tags: [polls, admin], summary: Crée sondage (admin), responses: { '200': { description: OK } } }
+    post:
+      tags: [polls, admin]
+      summary: Crée sondage (staff only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, questions]
+              properties:
+                title: { type: string }
+                questions:
+                  type: array
+                  items:
+                    type: object
+                    required: [question_text, options]
+                    properties:
+                      question_text: { type: string }
+                      options: { type: array, items: { type: string } }
+                      is_multiple_choice: { type: boolean }
+      responses:
+        '200': { description: OK }
+        '403': { description: 'Staff access required' }
   /api/v1/admin/polls/{id}:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     delete: { tags: [polls, admin], responses: { '200': { description: OK } } }
