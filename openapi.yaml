@@ -130,6 +130,27 @@ components:
         torrents:
           type: array
           items: { $ref: '#/components/schemas/Torrent' }
+    TorrentSearchFilters:
+      type: object
+      properties:
+        category: { type: string }
+        max_age_days: { type: string }
+        search_in: { type: string, enum: [title, description] }
+        tag: { type: string }
+        uploader: { type: string }
+    TorrentSearchResult:
+      type: object
+      properties:
+        count: { type: integer }
+        current_page: { type: integer }
+        limit: { type: integer }
+        query: { type: string }
+        filters: { $ref: '#/components/schemas/TorrentSearchFilters' }
+        total_count: { type: integer }
+        total_pages: { type: integer }
+        torrents:
+          type: array
+          items: { $ref: '#/components/schemas/Torrent' }
     UploadTorrentForm:
       type: object
       required: [torrent_file, title, category, subcategory, tags]
@@ -610,13 +631,23 @@ paths:
   /api/v1/torrents/search:
     get:
       tags: [torrents]
-      summary: Search
+      summary: Search (paginé + filtres)
       parameters:
         - { name: q, in: query, required: true, schema: { type: string } }
         - { name: search_in, in: query, schema: { type: string, enum: [title, description] } }
+        - { name: category, in: query, schema: { type: string } }
+        - { name: tag, in: query, schema: { type: string } }
         - { name: uploader, in: query, schema: { type: string } }
+        - { name: max_age_days, in: query, schema: { type: integer } }
         - { name: sort_by, in: query, schema: { type: string, enum: [created_at, seeders, size] } }
-      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TorrentList' } } } } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 25 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TorrentSearchResult' }
   /api/v1/torrents/upload:
     post:
       tags: [torrents]
