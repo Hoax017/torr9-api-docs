@@ -84,12 +84,20 @@ components:
       properties:
         id: { type: integer }
         title: { type: string }
-        description: { type: string, description: BBCode }
+        description: { type: string, description: BBCode, nullable: true }
+        info_hash: { type: string, nullable: true }
         file_size_bytes: { type: integer, format: int64 }
+        file_count: { type: integer, nullable: true }
         upload_date: { type: string, format: date-time }
+        created_at: { type: string, format: date-time, nullable: true }
+        age: { type: string, description: 'humanisé (ex 19 minutes, 1 heure)', nullable: true }
         is_freeleech: { type: boolean }
+        is_exclu: { type: boolean, nullable: true }
+        status: { type: string, nullable: true }
+        note_admin: { type: string, nullable: true }
         tags: { type: array, items: { type: string } }
         category_name: { type: string }
+        category_icon: { type: string, nullable: true }
         parent_category_name: { type: string }
         uploader_name: { type: string }
         seeders: { type: integer }
@@ -108,6 +116,17 @@ components:
       type: object
       properties:
         count: { type: integer }
+        torrents:
+          type: array
+          items: { $ref: '#/components/schemas/Torrent' }
+    TorrentListPaginated:
+      type: object
+      properties:
+        count: { type: integer, description: 'taille page actuelle' }
+        limit: { type: integer }
+        page: { type: integer }
+        total_count: { type: integer, description: 'total éléments' }
+        total_pages: { type: integer }
         torrents:
           type: array
           items: { $ref: '#/components/schemas/Torrent' }
@@ -571,8 +590,16 @@ paths:
   /api/v1/torrents/recent:
     get:
       tags: [torrents]
-      summary: Récents
-      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TorrentList' } } } } }
+      summary: Récents (paginé)
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 15 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TorrentListPaginated' }
   /api/v1/torrents/exclus:
     get:
       tags: [torrents]
