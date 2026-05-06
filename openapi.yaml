@@ -514,6 +514,54 @@ components:
       type: object
       properties:
         rss_key: { type: string }
+    GenerateDescTechInfo:
+      type: object
+      properties:
+        source: { type: string, example: WEBRip }
+        resolution: { type: string, example: 1080p }
+        video_format: { type: string, example: MKV }
+        video_codec: { type: string, example: x265 }
+        video_bitrate: { type: string, example: '5000' }
+        audio: { type: string, example: 'EAC3 5.1' }
+        subtitles: { type: string, example: Français }
+    GenerateDescRequest:
+      type: object
+      required: [title, category]
+      properties:
+        title: { type: string }
+        nfo: { type: string, description: 'NFO MediaInfo brut (optionnel)' }
+        category: { type: string, enum: [movie, tv, music, book, game], description: 'type de la catégorie (cf categories.json)' }
+        tmdb_id: { type: integer }
+        release_name: { type: string }
+        size_bytes: { type: integer, format: int64 }
+        file_count: { type: integer }
+        tech_info: { $ref: '#/components/schemas/GenerateDescTechInfo' }
+    GenerateDescMetadata:
+      type: object
+      properties:
+        title: { type: string, description: 'titre traduit FR' }
+        backdrop_url: { type: string }
+        poster_url: { type: string }
+        genres: { type: array, items: { type: string } }
+        imdb_id: { type: string }
+        tmdb_id: { type: integer }
+        tvdb_id: { type: integer }
+        rating: { type: number }
+        release_year: { type: integer }
+        synopsis: { type: string }
+    GenerateDescNfoData:
+      type: object
+      properties:
+        bitrate: { type: integer }
+        resolution: { type: string }
+        source: { type: string }
+        video_codec: { type: string }
+    GenerateDescResponse:
+      type: object
+      properties:
+        description: { type: string, description: 'BBCode prêt à coller dans le formulaire upload' }
+        metadata: { $ref: '#/components/schemas/GenerateDescMetadata' }
+        nfo_data: { $ref: '#/components/schemas/GenerateDescNfoData' }
     SharewoodTorrent:
       type: object
       properties:
@@ -781,6 +829,31 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/UploadTorrentResponse' }
+  /api/v1/torrents/generate-description:
+    post:
+      tags: [torrents]
+      summary: Génère description BBCode auto (TMDB + parse NFO)
+      description: |
+        Sert à pré-remplir la description du formulaire upload. Récupère la metadata TMDB/Google Books/IGDB selon `category`,
+        parse le `nfo` MediaInfo, et combine avec `tech_info` pour produire un BBCode formaté (poster, synopsis, casting, specs).
+
+        Catégories non supportées: `other` (ne fait rien d'utile sans source enrichissable).
+        Note: `book` peut renvoyer 429 si Google Books rate-limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GenerateDescRequest' }
+      responses:
+        '200':
+          description: 'BBCode + metadata enrichies'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GenerateDescResponse' }
+        '400':
+          description: 'Title required ou catégorie non supportée'
+        '429':
+          description: 'Rate limit upstream (ex: Google Books pour category=book)'
   /api/v1/torrents/parse-metadata:
     post:
       tags: [torrents]
