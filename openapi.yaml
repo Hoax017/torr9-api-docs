@@ -562,6 +562,40 @@ components:
         description: { type: string, description: 'BBCode prêt à coller dans le formulaire upload' }
         metadata: { $ref: '#/components/schemas/GenerateDescMetadata' }
         nfo_data: { $ref: '#/components/schemas/GenerateDescNfoData' }
+    TeamMember:
+      type: object
+      properties:
+        id: { type: integer }
+        team_id: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        avatar_url: { type: string }
+        role: { type: string, example: Membre }
+        joined_at: { type: string, format: date-time }
+    Team:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        logo_url: { type: string }
+        banner_url: { type: string }
+        founded_date: { type: string }
+        website: { type: string }
+        torrents_url: { type: string }
+        is_active: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        members:
+          type: array
+          items: { $ref: '#/components/schemas/TeamMember' }
+    TeamsList:
+      type: object
+      properties:
+        teams:
+          type: array
+          items: { $ref: '#/components/schemas/Team' }
     SharewoodTorrent:
       type: object
       properties:
@@ -947,26 +981,29 @@ paths:
           description: 'Flux RSS 2.0 XML'
           content:
             application/rss+xml:
-              schema: { $ref: '#/components/schemas/RssFeed' }
-              example: |
-                <?xml version="1.0" encoding="UTF-8"?>
-                <rss version="2.0">
-                  <channel>
-                    <title>Torr9 - Torrents Récents</title>
-                    <link>https://torr9.net</link>
-                    <description>Flux RSS des derniers torrents publiés sur Torr9</description>
-                    <language>fr-FR</language>
-                    <item>
-                      <title>Wild.Strawberries.1957.MULTI.VFF.1080p.WEB.DDP.2.0.H264-FW</title>
-                      <link>https://torr9.net/torrents/259587</link>
-                      <description>Uploaded by award6013 | Size: 7.4 GB | Category: Films</description>
-                      <pubDate>Tue, 05 May 2026 22:04:44 +0000</pubDate>
-                      <category>Films</category>
-                      <guid>https://torr9.net/torrents/259587</guid>
-                      <enclosure url="https://api.torr9.net/api/v1/rss/torrents/259587/download?passkey=XXX" length="7893428845" type="application/x-bittorrent"/>
-                    </item>
-                  </channel>
-                </rss>
+              schema: { type: string, format: xml }
+              examples:
+                feed:
+                  summary: 'RSS récents (extrait)'
+                  value: |
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <rss version="2.0">
+                      <channel>
+                        <title>Torr9 - Torrents Récents</title>
+                        <link>https://torr9.net</link>
+                        <description>Flux RSS des derniers torrents publiés sur Torr9</description>
+                        <language>fr-FR</language>
+                        <item>
+                          <title>Wild.Strawberries.1957.MULTI.VFF.1080p.WEB.DDP.2.0.H264-FW</title>
+                          <link>https://torr9.net/torrents/259587</link>
+                          <description>Uploaded by award6013 | Size: 7.4 GB | Category: Films</description>
+                          <pubDate>Tue, 05 May 2026 22:04:44 +0000</pubDate>
+                          <category>Films</category>
+                          <guid>https://torr9.net/torrents/259587</guid>
+                          <enclosure url="https://api.torr9.net/api/v1/rss/torrents/259587/download?passkey=XXX" length="7893428845" type="application/x-bittorrent"/>
+                        </item>
+                      </channel>
+                    </rss>
   /api/v1/rss/{category}:
     parameters:
       - { name: category, in: path, required: true, schema: { type: string }, description: 'slug catégorie (films, series-tv, music, etc.)' }
@@ -980,26 +1017,29 @@ paths:
           description: 'Flux RSS 2.0 XML filtré par catégorie'
           content:
             application/rss+xml:
-              schema: { $ref: '#/components/schemas/RssFeed' }
-              example: |
-                <?xml version="1.0" encoding="UTF-8"?>
-                <rss version="2.0">
-                  <channel>
-                    <title>Torr9 - film</title>
-                    <link>https://torr9.net</link>
-                    <description>Flux RSS des derniers torrents publiés sur Torr9</description>
-                    <language>fr-FR</language>
-                    <item>
-                      <title>Hoppers.2026.MULTi.TRUEFRENCH.1080p.WEB-DL.H264-Slay3R</title>
-                      <link>https://torr9.net/torrents/259446</link>
-                      <description>Uploaded by bidib | Size: 8.3 GB | Category: Films d'animation</description>
-                      <pubDate>Tue, 05 May 2026 17:39:04 +0000</pubDate>
-                      <category>Films d'animation</category>
-                      <guid>https://torr9.net/torrents/259446</guid>
-                      <enclosure url="https://api.torr9.net/api/v1/rss/torrents/259446/download?passkey=XXX" length="8877262467" type="application/x-bittorrent"/>
-                    </item>
-                  </channel>
-                </rss>
+              schema: { type: string, format: xml }
+              examples:
+                films:
+                  summary: 'category=film'
+                  value: |
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <rss version="2.0">
+                      <channel>
+                        <title>Torr9 - film</title>
+                        <link>https://torr9.net</link>
+                        <description>Flux RSS des derniers torrents publiés sur Torr9</description>
+                        <language>fr-FR</language>
+                        <item>
+                          <title>Hoppers.2026.MULTi.TRUEFRENCH.1080p.WEB-DL.H264-Slay3R</title>
+                          <link>https://torr9.net/torrents/259446</link>
+                          <description>Uploaded by bidib | Size: 8.3 GB | Category: Films d'animation</description>
+                          <pubDate>Tue, 05 May 2026 17:39:04 +0000</pubDate>
+                          <category>Films d'animation</category>
+                          <guid>https://torr9.net/torrents/259446</guid>
+                          <enclosure url="https://api.torr9.net/api/v1/rss/torrents/259446/download?passkey=XXX" length="8877262467" type="application/x-bittorrent"/>
+                        </item>
+                      </channel>
+                    </rss>
   # ===== TORZNAB (Prowlarr/Jackett/Sonarr/Radarr) =====
   /api/v1/torznab:
     get:
@@ -1063,18 +1103,25 @@ paths:
                   summary: 't=search&q=mario'
                   value: |
                     <?xml version="1.0" encoding="UTF-8"?>
-                    <rss version="2.0" xmlns:torznab="http://torznab.com/schemas/2015/feed">
+                    <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:torznab="http://torznab.com/schemas/2015/feed">
                       <channel>
                         <title>Torr9 Tracker</title>
                         <description>Torr9 Torznab Feed</description>
                         <link>https://api.torr9.net</link>
                         <item>
-                          <title>The.Super.Mario.Galaxy.Movie...</title>
+                          <title>The.Super.Mario.Galaxy.Movie.2026.MULTI.VFQ.1080p.WEBRip.10bits.EAC3.5.1.x265-KTH</title>
                           <guid>5a717924fa21de4ecd92055a2ce262dd6b2d9fad</guid>
                           <link>https://api.torr9.net/api/v1/torznab/torrents/259552/download?passkey=XXX</link>
-                          <comments>https://torr9.net/torrents/259552</comments>
+                          <comments>https://api.torr9.net/torrents/259552</comments>
                           <pubDate>Tue, 05 May 2026 21:15:31 +0000</pubDate>
                           <size>2229410979</size>
+                          <description>[BBCode description...]</description>
+                          <enclosure url="https://api.torr9.net/api/v1/torznab/torrents/259552/download?passkey=XXX" length="2229410979" type="application/x-bittorrent"/>
+                          <torznab:attr name="size" value="2229410979"/>
+                          <torznab:attr name="seeders" value="58"/>
+                          <torznab:attr name="peers" value="66"/>
+                          <torznab:attr name="infohash" value="5A717924FA21DE4ECD92055A2CE262DD6B2D9FAD"/>
+                          <torznab:attr name="category" value="2000"/>
                         </item>
                       </channel>
                     </rss>
@@ -1092,6 +1139,60 @@ paths:
           description: 'Bytes du .torrent'
           content:
             application/x-bittorrent:
+              schema: { type: string, format: binary }
+
+  # ===== TEAMS =====
+  /api/v1/teams:
+    get:
+      tags: [teams]
+      summary: Liste teams releaser + membres
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TeamsList' }
+  /api/v1/teams/{slug}:
+    parameters:
+      - { name: slug, in: path, required: true, schema: { type: string }, description: 'team slug (ex: team-thesyndicate)' }
+    get:
+      tags: [teams]
+      summary: Détail team
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Team' }
+
+  # ===== MY UPLOADS =====
+  /api/v1/torrents/my-uploads:
+    get:
+      tags: [torrents]
+      summary: Mes uploads (paginé, format /torrents/search)
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 50 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TorrentSearchResult' }
+
+  # ===== IMAGE PROXY =====
+  /api/v1/proxy/image:
+    get:
+      tags: [misc]
+      summary: Proxy image (cache + transcode WebP probable)
+      security: []
+      parameters:
+        - { name: url, in: query, required: true, schema: { type: string, format: uri }, description: 'URL absolue de l''image source' }
+      responses:
+        '200':
+          description: 'Image (souvent re-servie en image/webp)'
+          content:
+            image/webp:
               schema: { type: string, format: binary }
 
   # ===== SHAREWOOD MIRROR =====
