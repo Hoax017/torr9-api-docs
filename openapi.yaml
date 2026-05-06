@@ -514,6 +514,29 @@ components:
       type: object
       properties:
         rss_key: { type: string }
+    SharewoodTorrent:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        info_hash: { type: string }
+        file_size_bytes: { type: integer, format: int64 }
+        file_count: { type: integer }
+        upload_date: { type: string, format: date-time }
+        seeders: { type: integer }
+        leechers: { type: integer }
+        times_completed: { type: integer }
+        tags: { type: array, items: { type: string } }
+        category_id: { type: integer }
+        category_name: { type: string }
+    SharewoodList:
+      type: object
+      properties:
+        limit: { type: integer }
+        page: { type: integer }
+        torrents:
+          type: array
+          items: { $ref: '#/components/schemas/SharewoodTorrent' }
     RssEnclosure:
       type: object
       xml: { name: enclosure }
@@ -904,6 +927,116 @@ paths:
                     </item>
                   </channel>
                 </rss>
+  # ===== TORZNAB (Prowlarr/Jackett/Sonarr/Radarr) =====
+  /api/v1/torznab:
+    get:
+      tags: [torznab]
+      summary: Endpoint Torznab (capabilities + search) — utilisé par Prowlarr/Jackett/Sonarr/Radarr
+      description: |
+        Endpoint unique avec dispatch via `t=`. Auth via `apikey=<passkey>` en query.
+
+        Configuration Prowlarr: Indexer "Generic Torznab", URL `https://api.torr9.net/api/v1/torznab`, API Key = ta passkey.
+
+        Catégories Newznab supportées:
+        | id | nom |
+        |---|---|
+        | 1000 | Console/Games |
+        | 2000 | Movies |
+        | 3000 | Audio |
+        | 4000 | PC/Applications |
+        | 5000 | TV |
+        | 7000 | Books/eBook |
+        | 8000 | Other |
+      security: []
+      parameters:
+        - { name: apikey, in: query, required: true, schema: { type: string }, description: 'passkey utilisateur' }
+        - name: t
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [caps, search, tv-search, movie-search]
+        - { name: q, in: query, schema: { type: string }, description: 'query texte (search/tv-search/movie-search)' }
+        - { name: imdbid, in: query, schema: { type: string }, description: 'movie-search' }
+        - { name: tvdbid, in: query, schema: { type: integer }, description: 'tv-search' }
+        - { name: season, in: query, schema: { type: integer }, description: 'tv-search' }
+        - { name: ep, in: query, schema: { type: integer }, description: 'tv-search épisode' }
+        - { name: freeleech, in: query, schema: { type: boolean } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: 'XML — caps si t=caps, RSS Torznab si t=search/tv-search/movie-search'
+          content:
+            application/xml:
+              schema: { type: string, format: xml }
+              examples:
+                caps:
+                  summary: 't=caps'
+                  value: |
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <caps>
+                      <server title="Torr9 Tracker" version="1.0"/>
+                      <searching>
+                        <search available="yes" supportedParams="q,freeleech"/>
+                        <tv-search available="yes" supportedParams="q,tvdbid,season,ep,freeleech"/>
+                        <movie-search available="yes" supportedParams="q,imdbid,freeleech"/>
+                      </searching>
+                      <categories>
+                        <category id="2000" name="Movies"/>
+                        <category id="5000" name="TV"/>
+                      </categories>
+                    </caps>
+                search:
+                  summary: 't=search&q=mario'
+                  value: |
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <rss version="2.0" xmlns:torznab="http://torznab.com/schemas/2015/feed">
+                      <channel>
+                        <title>Torr9 Tracker</title>
+                        <description>Torr9 Torznab Feed</description>
+                        <link>https://api.torr9.net</link>
+                        <item>
+                          <title>The.Super.Mario.Galaxy.Movie...</title>
+                          <guid>5a717924fa21de4ecd92055a2ce262dd6b2d9fad</guid>
+                          <link>https://api.torr9.net/api/v1/torznab/torrents/259552/download?passkey=XXX</link>
+                          <comments>https://torr9.net/torrents/259552</comments>
+                          <pubDate>Tue, 05 May 2026 21:15:31 +0000</pubDate>
+                          <size>2229410979</size>
+                        </item>
+                      </channel>
+                    </rss>
+  /api/v1/torznab/torrents/{id}/download:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [torznab]
+      summary: Download .torrent via passkey (utilisé dans link Torznab feed)
+      security: []
+      parameters:
+        - { name: passkey, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: 'Bytes du .torrent'
+          content:
+            application/x-bittorrent:
+              schema: { type: string, format: binary }
+
+  # ===== SHAREWOOD MIRROR =====
+  /api/v1/torrents/sharewood:
+    get:
+      tags: [torrents]
+      summary: Liste torrents ShareWood (autre tracker FR mirror)
+      description: 'Champs réduits vs `/torrents` (pas de description/uploader_name/seeders en mode public, mais seeders/leechers oui).'
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 50 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SharewoodList' }
+
   /api/v1/rss/torrents/{id}/download:
     parameters:
       - { name: id, in: path, required: true, schema: { type: integer } }
