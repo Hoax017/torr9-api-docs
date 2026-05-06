@@ -339,6 +339,35 @@ components:
     NotificationsCount:
       type: object
       properties: { unread: { type: integer } }
+    Notification:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        type: { type: string, description: 'admin_message, request_response, comment, etc.' }
+        title: { type: string }
+        message: { type: string }
+        is_read: { type: boolean }
+        created_at: { type: string, format: date-time }
+        age: { type: string, description: 'humanisé (ex: 27 min)' }
+    NotificationsList:
+      type: object
+      properties:
+        limit: { type: integer }
+        notifications:
+          type: array
+          items: { $ref: '#/components/schemas/Notification' }
+    UserSearchResult:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              username: { type: string }
+              avatar_url: { type: string }
     Announcement:
       type: object
       properties:
@@ -785,6 +814,18 @@ paths:
   # ===== USERS =====
   /api/v1/users/me:
     get: { tags: [users], summary: Profil courant, responses: { '200': { description: User, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } } } }
+  /api/v1/users/search:
+    get:
+      tags: [users]
+      summary: Recherche users par prefix username
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserSearchResult' }
   /api/v1/users/{id}:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     get:
@@ -1793,10 +1834,41 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/LeaderboardEntry' }
+  /api/v1/notifications:
+    get:
+      tags: [misc]
+      summary: Liste notifications utilisateur
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 30 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationsList' }
+  /api/v1/notifications/{id}/read:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [misc]
+      summary: Marque 1 notification comme lue
+      responses:
+        '200': { description: OK }
+  /api/v1/notifications/read-all:
+    post:
+      tags: [misc]
+      summary: Marque toutes les notifications comme lues
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { success: { type: boolean } }
   /api/v1/notifications/count:
     get:
       tags: [misc]
-      summary: Notifications non lues
+      summary: Notifications non lues (compteur)
       responses:
         '200':
           description: OK
