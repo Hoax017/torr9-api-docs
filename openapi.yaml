@@ -1867,6 +1867,13 @@ paths:
                 option_ids: { type: array, items: { type: integer } }
       responses: { '200': { description: OK } }
   /api/v1/admin/polls:
+    get:
+      tags: [admin]
+      summary: List sondages (admin)
+      description: 'Existe (403 sans rôle admin). Schéma non observé.'
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
     post:
       tags: [polls, admin]
       summary: Crée sondage (staff only)
@@ -1891,6 +1898,145 @@ paths:
       responses:
         '200': { description: OK }
         '403': { description: 'Staff access required' }
+
+  # ===== ADMIN — schémas non observés (accès 403 avec userplus) =====
+  /api/v1/admin/users:
+    get:
+      tags: [admin]
+      summary: Liste users (admin)
+      description: 'Existe (403 Admin access required sans rôle admin). Schéma de réponse non observé.'
+      parameters:
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/users/search:
+    get:
+      tags: [admin]
+      summary: Recherche users (admin)
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/users/banned:
+    get:
+      tags: [admin]
+      summary: Users bannis (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/users/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get:
+      tags: [admin]
+      summary: Détail user (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+    patch:
+      tags: [admin]
+      summary: Modifie user (admin) — body non observé
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+    delete:
+      tags: [admin]
+      summary: Supprime user (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/users/{id}/ban:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [admin]
+      summary: Ban user (admin) — body probable `{reason, duration?}`
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/users/{id}/unban:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [admin]
+      summary: Unban user (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/users/{id}/jetons:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [admin]
+      summary: Modifie balance jetons (admin) — body probable `{amount, reason}`
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/torrents/pending:
+    get:
+      tags: [admin]
+      summary: Torrents en attente de modération (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/torrents/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    patch:
+      tags: [admin]
+      summary: Edit torrent (admin) — body non observé
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+    delete:
+      tags: [admin]
+      summary: Supprime torrent (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/torrents/{id}/approve:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [admin]
+      summary: Approuve torrent pending (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/torrents/{id}/reject:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [admin]
+      summary: Rejette torrent pending (admin) — body probable `{reason}`
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/reports:
+    get:
+      tags: [admin]
+      summary: Liste reports (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/reports/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    post:
+      tags: [admin]
+      summary: Action sur report (admin) — body non observé
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/stats:
+    get:
+      tags: [admin]
+      summary: Stats internes (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
+  /api/v1/admin/pool:
+    get:
+      tags: [admin]
+      summary: Pool admin view (admin)
+      responses:
+        '200': { description: OK }
+        '403': { description: Admin access required }
   /api/v1/admin/polls/{id}:
     parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
     delete: { tags: [polls, admin], responses: { '200': { description: OK } } }
