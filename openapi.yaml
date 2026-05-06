@@ -514,6 +514,30 @@ components:
       type: object
       properties:
         rss_key: { type: string }
+    SearchMediaRequest:
+      type: object
+      required: [query]
+      properties:
+        query: { type: string }
+        category: { type: string, enum: [movie, tv], description: 'filtre TMDB' }
+    SearchMediaItem:
+      type: object
+      properties:
+        id: { type: string, description: 'TMDB id (string, pas integer)' }
+        title: { type: string }
+        year: { type: string, description: 'année (peut être vide)' }
+        poster_url: { type: string }
+        rating: { type: number }
+        metacritic: { type: number }
+        description: { type: string }
+        media_type: { type: string, enum: [movie, tv] }
+    SearchMediaResponse:
+      type: object
+      properties:
+        count: { type: integer }
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/SearchMediaItem' }
     GenerateDescTechInfo:
       type: object
       properties:
@@ -888,6 +912,22 @@ paths:
           description: 'Title required ou catégorie non supportée'
         '429':
           description: 'Rate limit upstream (ex: Google Books pour category=book)'
+  /api/v1/torrents/search-media:
+    post:
+      tags: [torrents]
+      summary: Search media TMDB (pré-fill upload, autocompletion)
+      description: 'Recherche TMDB côté serveur (movie/tv). Différent de `/torrents/search` qui cherche les torrents indexés. Sert au formulaire upload + page de search pour résoudre titre → tmdb_id.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SearchMediaRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchMediaResponse' }
   /api/v1/torrents/parse-metadata:
     post:
       tags: [torrents]
