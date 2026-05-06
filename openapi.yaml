@@ -66,19 +66,24 @@ components:
         id: { type: integer }
         username: { type: string }
         email: { type: string, format: email }
-        role: { type: string, enum: [user, userplus, vip, admin] }
+        role: { type: string, enum: [user, userplus, vip, uploader, releaser, modo, admin] }
         avatar_url: { type: string }
-        passkey: { type: string }
-        uploaded: { type: integer, format: int64 }
-        downloaded: { type: integer, format: int64 }
-        total_uploaded_bytes: { type: integer, format: int64 }
+        passkey: { type: string, description: 'Tracker passkey' }
+        total_uploaded_bytes: { type: integer, format: int64, description: 'Octets uploadés réels via tracker' }
         total_downloaded_bytes: { type: integer, format: int64 }
-        bonus_uploaded: { type: integer }
-        bonus_downloaded: { type: integer }
+        bonus_uploaded: { type: integer, format: int64, description: 'Bonus ajouté via shop/milestones' }
+        bonus_downloaded: { type: integer, format: int64 }
+        freeleech_tokens: { type: integer, description: 'Tokens permettant DL freeleech ponctuel' }
+        jeton_balance: { type: integer, description: 'Monnaie interne (shop, requests bounty, etc.)' }
+        can_download: { type: boolean, description: 'False si ratio sous seuil' }
+        is_active: { type: boolean }
+        is_banned: { type: boolean }
+        ban_reason: { type: string, nullable: true }
+        premium_flags: { type: integer, description: 'Bitmask premium features' }
         want_porn: { type: boolean }
         hide_ratio: { type: boolean }
-        citation: { type: string }
-        jeton_balance: { type: integer }
+        citation: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
     Torrent:
       type: object
       description: 'Champs varient selon endpoint (recent/search/list/detail). Les champs non-applicables sont absents ou null.'
